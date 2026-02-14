@@ -94,75 +94,55 @@ USING (auth.uid() = user_id);
 
 ##  Challenges & Learnings
 
-Building a real-time, multi-user system exposed several non-trivial challenges beyond basic CRUD operations.
-
-### 1. Real-time Updates Not Syncing Across Tabs  
-Initially, changes made in one tab were not reflected in others.
-
-- **Issue:** Realtime subscriptions were not properly authenticated.  
-- **Fix:** Explicitly set the access token for realtime channels:  
-  ```js
-  await supabase.realtime.setAuth(session.access_token)
-  ```
+**1. Real-time updates not syncing across tabs**  
+Initially, changes were not reflected in other browser tabs.  
+- **Issue:** Realtime subscriptions were not authenticated properly.  
+- **Fix:** Added authentication to realtime channels using:  
+  `await supabase.realtime.setAuth(session.access_token)`
 
 ---
 
-### 2. Duplicate Entries from Realtime Events  
-On inserting new bookmarks, duplicate entries occasionally appeared in the UI.
-
-- **Issue:** Both optimistic UI updates and realtime events were adding the same record.  
-- **Fix:** Implemented a deduplication check to ensure the record ID does not already exist in the local state before updating.
-
----
-
-### 3. Row Level Security (RLS) Blocking Inserts  
-Insert operations were silently failing despite the user being authenticated.
-
-- **Issue:** The `user_id` field was missing in the payload, causing RLS policies to reject the insert.  
-- **Fix:** Explicitly attached the `user_id` from the active session before performing the insert operation.
+**2. Duplicate entries from realtime events**  
+When inserting a bookmark, duplicates sometimes appeared.  
+- **Issue:** Both the local state update and the realtime event were adding the same record.  
+- **Fix:** Added a check to ensure the record ID doesn’t already exist before updating state.
 
 ---
 
-### 4. Session Handling Inconsistencies  
-On page refresh, authentication state was sometimes lost.
+**3. RLS blocking inserts**  
+Insert operations failed without any clear error.  
+- **Issue:** The `user_id` field was missing, so RLS policies rejected the insert.  
+- **Fix:** Explicitly included `user_id` from the current session in the insert payload.
 
-- **Issue:** `getUser()` occasionally returned `null` during hydration.  
-- **Fix:** Switched to `supabase.auth.getSession()` for more reliable session persistence in the App Router.
+---
+
+**4. Session handling on refresh**  
+Auth state was sometimes lost on page refresh.  
+- **Issue:** `getUser()` returned null during initial load.  
+- **Fix:** Switched to `supabase.auth.getSession()` for consistent session handling.
 
 ---
 
 ##  Trade-offs
 
-### Client-Side Validation  
-- Prioritized client-side validation for faster feedback and smoother UX.  
-- Trade-off: Requires careful backend enforcement (via RLS) for security.
-
-### BaaS vs Custom Backend  
-- Chose **Supabase** to accelerate development and focus on product logic.  
-- Trade-off: Less control compared to a fully custom backend.
-
-### Lightweight Metadata (Favicon API)  
-- Used a simple favicon service for link previews.  
-- Trade-off: Faster and lightweight, but lacks rich metadata (title, description).
+- **Client-side validation:** Faster feedback for users, but relies on backend (RLS) for security.  
+- **Supabase vs custom backend:** Chose Supabase to move faster and focus on core features.  
+- **Favicon API:** Lightweight solution for previews, but limited metadata.
 
 ---
 
 ##  Possible Improvements
 
-- **Edit / Update:** Allow users to rename bookmarks.  
-- **Categorization:** Introduce tags or folders for better organization.  
-- **Search & Filter:** Add client-side or indexed search for scalability.  
-- **Metadata Extraction:** Use a serverless function to fetch page titles and descriptions.  
-- **Pagination / Infinite Scroll:** Improve performance for large datasets.  
+- Add edit functionality for bookmarks  
+- Add tags or categories  
+- Implement search and filtering  
+- Fetch page metadata (title, description) using a serverless function  
 
 ---
 
 ##  What I Learned
 
-- Designing systems with **user isolation as a core principle** using database-level security (RLS).  
-- Handling **real-time data synchronization** across multiple clients without conflicts.  
-- Debugging complex interactions between **authentication, database policies, and UI state**.  
-- Managing **optimistic UI updates vs server-driven events**.  
-- Building a product that behaves like a **real SaaS application**, not just a technical demo.  
-
-
+- How to enforce **data isolation using RLS**  
+- How **real-time updates** work across multiple clients  
+- How auth, database policies, and UI state interact  
+- Handling conflicts between **local state and realtime events**  
