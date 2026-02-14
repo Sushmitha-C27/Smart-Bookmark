@@ -87,5 +87,82 @@ This allows a user to open two tabs, delete a bookmark in one, and see it disapp
 CREATE POLICY "Enable access for users based on user_id" 
 ON public.bookmarks FOR ALL 
 USING (auth.uid() = user_id);
+  ```
+
+
+---
+
+##  Challenges & Learnings
+
+Building a real-time, multi-user system exposed several non-trivial challenges beyond basic CRUD operations.
+
+### 1. Real-time Updates Not Syncing Across Tabs  
+Initially, changes made in one tab were not reflected in others.
+
+- **Issue:** Realtime subscriptions were not properly authenticated.  
+- **Fix:** Explicitly set the access token for realtime channels:  
+  ```js
+  await supabase.realtime.setAuth(session.access_token)
+  ```
+
+---
+
+### 2. Duplicate Entries from Realtime Events  
+On inserting new bookmarks, duplicate entries occasionally appeared in the UI.
+
+- **Issue:** Both optimistic UI updates and realtime events were adding the same record.  
+- **Fix:** Implemented a deduplication check to ensure the record ID does not already exist in the local state before updating.
+
+---
+
+### 3. Row Level Security (RLS) Blocking Inserts  
+Insert operations were silently failing despite the user being authenticated.
+
+- **Issue:** The `user_id` field was missing in the payload, causing RLS policies to reject the insert.  
+- **Fix:** Explicitly attached the `user_id` from the active session before performing the insert operation.
+
+---
+
+### 4. Session Handling Inconsistencies  
+On page refresh, authentication state was sometimes lost.
+
+- **Issue:** `getUser()` occasionally returned `null` during hydration.  
+- **Fix:** Switched to `supabase.auth.getSession()` for more reliable session persistence in the App Router.
+
+---
+
+##  Trade-offs
+
+### Client-Side Validation  
+- Prioritized client-side validation for faster feedback and smoother UX.  
+- Trade-off: Requires careful backend enforcement (via RLS) for security.
+
+### BaaS vs Custom Backend  
+- Chose **Supabase** to accelerate development and focus on product logic.  
+- Trade-off: Less control compared to a fully custom backend.
+
+### Lightweight Metadata (Favicon API)  
+- Used a simple favicon service for link previews.  
+- Trade-off: Faster and lightweight, but lacks rich metadata (title, description).
+
+---
+
+##  Possible Improvements
+
+- **Edit / Update:** Allow users to rename bookmarks.  
+- **Categorization:** Introduce tags or folders for better organization.  
+- **Search & Filter:** Add client-side or indexed search for scalability.  
+- **Metadata Extraction:** Use a serverless function to fetch page titles and descriptions.  
+- **Pagination / Infinite Scroll:** Improve performance for large datasets.  
+
+---
+
+##  What I Learned
+
+- Designing systems with **user isolation as a core principle** using database-level security (RLS).  
+- Handling **real-time data synchronization** across multiple clients without conflicts.  
+- Debugging complex interactions between **authentication, database policies, and UI state**.  
+- Managing **optimistic UI updates vs server-driven events**.  
+- Building a product that behaves like a **real SaaS application**, not just a technical demo.  
 
 
