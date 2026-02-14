@@ -6,13 +6,13 @@ The goal of this project was to move beyond a basic CRUD application and design 
 
 ---
 
-## 🚀 Live Demo
+##  Live Demo
 
 👉 [https://smart-bookmark-six-rouge.vercel.app](https://smart-bookmark-six-rouge.vercel.app)
 
 ---
 
-## 🛠 Tech Stack
+##  Tech Stack
 
 - **Frontend:** Next.js 15 (App Router), React 19
 - **Backend / DB:** Supabase (PostgreSQL, Auth, Realtime)
@@ -22,7 +22,7 @@ The goal of this project was to move beyond a basic CRUD application and design 
 
 ---
 
-## ✨ Features
+##  Features
 
 - **Google OAuth Authentication:** Secure, passwordless login.
 - **Private Data Isolation:** Uses Row Level Security (RLS) to ensure users only see their own data.
@@ -32,7 +32,7 @@ The goal of this project was to move beyond a basic CRUD application and design 
 
 ---
 
-## 🧠 System Design Approach
+##  System Design Approach
 
 Instead of a simple CRUD app, I approached this as a **multi-user system with real-time requirements**.
 
