@@ -87,48 +87,5 @@ This allows a user to open two tabs, delete a bookmark in one, and see it disapp
 CREATE POLICY "Enable access for users based on user_id" 
 ON public.bookmarks FOR ALL 
 USING (auth.uid() = user_id);
------
----
 
-## 🏗 Challenges & Learnings
 
-**1. Real-time not updating across tabs** Initially, changes were not reflected in other browser contexts.
-- **Issue:** Real-time subscriptions were not properly authenticated.
-- **Fix:** `await supabase.realtime.setAuth(session.access_token)`
-
-**2. Duplicate data from real-time events** When inserting data, the UI occasionally showed duplicates.
-- **Issue:** The local state update and the real-time event were both adding the same record.
-- **Fix:** Added a check to verify if the record ID already exists in state before updating.
-
-**3. RLS blocking inserts** Insert operations failed silently even when authenticated.
-- **Issue:** The `user_id` was missing from the payload.
-- **Fix:** Explicitly attached the `user_id` from the active session before the insert call.
-
-**4. Session handling inconsistencies** `getUser()` sometimes returned null on page refresh.
-- **Fix:** Switched to `supabase.auth.getSession()` for more reliable session persistence in the App Router.
-
----
-
-## 🔄 Trade-offs
-
-- **Client-Side Validation:** Prioritized for faster iteration and better user feedback.
-- **BaaS vs. Custom Backend:** Chose Supabase for rapid backend setup, allowing me to focus on the real-time logic and UI/UX.
-- **Favicon API:** Used a simple favicon service for link previews to keep the application lightweight without scraping full site metadata.
-
----
-
-## 📈 Possible Improvements
-
-- **Edit / Update:** Add functionality to rename bookmarks.
-- **Categorization:** Tagging system for better organization.
-- **Search & Filter:** Client-side search for large datasets.
-- **Metadata Extraction:** Implementing a serverless function to fetch page titles and descriptions automatically.
-
----
-
-## 💡 What I Learned
-
-- Designing systems with **user isolation** as a priority.
-- Handling **real-time data synchronization** across distributed clients.
-- Debugging complex interactions between **auth, database policies, and UI state**.
-- Building a product that behaves like a **real SaaS tool**, not just a technical demo.
