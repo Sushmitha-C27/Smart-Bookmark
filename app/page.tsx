@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
-import LoadingScreen from '@/components/LoadingScreen' // Ensure this path is correct!
+import LoadingScreen from '@/components/LoadingScreen' 
 
 export default function Home() {
   const router = useRouter()
@@ -32,7 +32,7 @@ export default function Home() {
     })
   }
 
-  // 🔄 Show Loading Screen during initial check OR during OAuth redirect
+  //  Show Loading Screen during initial check OR during OAuth redirect
   if (isChecking || isRedirecting) {
     return <LoadingScreen />
   }
@@ -40,11 +40,11 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#030303] flex items-center justify-center p-6 overflow-hidden relative">
       
-      {/* 🌌 ANIMATED BACKGROUND DECOR */}
+      {/*  ANIMATED BACKGROUND DECOR */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 blur-[120px] rounded-full animate-pulse" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 blur-[120px] rounded-full animate-pulse delay-700" />
 
-      {/* 📦 LOGIN CARD */}
+      {/*  LOGIN CARD */}
       <div className="relative z-10 w-full max-w-md">
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 md:p-12 rounded-[2.5rem] shadow-2xl">
           
